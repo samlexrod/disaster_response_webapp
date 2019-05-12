@@ -88,3 +88,6 @@ def main():
               'to as the third argument. \n\nExample: python process_data.py '\
               'disaster_messages.csv disaster_categories.csv '\
               'DisasterResponse.db')
+        
+if __name__ == '__main__':
+    main()
