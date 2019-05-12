@@ -17,6 +17,35 @@ def load_data(messages_filepath, categories_filepath):
                     on='id',
                     how='left')
 
+def clean_data(df):
+    """
+    A function that gets a dirty dataframe and returns a clean data frame
+    parameter
+    ---------
+    df : the pandas dataframe to be cleaned    
+    return
+    ------
+    A clean dataframe
+    """
+    categories = df.categories.str.split(";", expand=True)
+    row = categories.iloc[0, :]
+    category_colnames = row.str.split('-').apply(lambda x: x[0])
+    categories.columns = category_colnames
+    
+    for column in categories:
+        # set each value to be the last character of the string
+        categories[column] = categories[column].apply(lambda x: x[-1:])
+
+        # convert column from string to numeric
+        categories[column] = categories[column].astype(int)
+        
+    df.drop('categories', axis=1, inplace=True)
+    
+    df = pd.concat([df, categories], axis=1)
+    
+    df.drop_duplicates(inplace=True)
+    
+    return df
 
 
 def main():
