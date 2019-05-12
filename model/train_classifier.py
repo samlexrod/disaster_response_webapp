@@ -42,6 +42,35 @@ def extract_data(database_name):
     
     return X, y, category_names
 
+def tokenize(text):
+    """
+    A function to tokenize each message and convert them into words
+    It is designed to be passed into the Count Vectorizer
+    parameter
+    ---------
+    text : the messages to tokenize, stem, and lemmatize
+    return
+    ------
+    cleaned words
+    """
+    # Clean the message
+    text = re.sub("\W", " ", text)
+    
+    # Tokenize the words
+    words = word_tokenize(text)
+    
+    # Remove stop words
+    words = [w for w in words if w not in stopwords.words('english')]
+        
+    # Stemmer and Lemmatizer
+    stemmer = PorterStemmer()
+    lemmatizer = WordNetLemmatizer()
+    
+    words = [stemmer.stem(w) for w in words]    
+    words = [lemmatizer.lemmatize(w) for w in words]    
+    
+    return words
+
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
