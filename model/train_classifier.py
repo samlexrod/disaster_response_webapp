@@ -4,6 +4,9 @@ import pickle
 import pandas as pd
 import numpy as np
 import nltk
+import time
+import cloudpickle
+import pickle
 from sqlalchemy import create_engine
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -17,6 +20,8 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
 from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.base import BaseEstimator, TransformerMixin
 
 nltk.download(['punkt', 'stopwords', 'wordnet'])
 
@@ -83,13 +88,31 @@ def build_model():
     returns
     -------
     A fitted model
-    
-    returns
-    -------
-    A pipeline as the model
     """
     forest = RandomForestClassifier()
     clf_multi = MultiOutputClassifier(forest, n_jobs=-1)
+    
+    class MessLen(BaseEstimator, TransformerMixin):
+        """
+        Returns the message length. 
+        """
+        
+        def __init__(self):
+            """
+            Sets the incremetal count
+            """
+            self.i = 1
+            
+        def fit(self, X, y=None):
+            return self
+
+        def transform(self, X):
+            """
+            Print corss validation fold and time.
+            """
+            print("CrossValidationFold:", self.i, 'on', time.asctime(time.localtime(time.time())))
+            self.i += 1
+            return pd.DataFrame(pd.Series(X).apply(len))
 
     pipeline = Pipeline(
         steps=[
@@ -99,12 +122,24 @@ def build_model():
                         steps=[
                             ('vect', CountVectorizer(tokenizer=tokenize)),
                             ('tfidf', TfidfTransformer())
-                        ]))
+                        ])),
+                    ('sentlen', MessLen())
                 ])),
             ('clf', clf_multi)
         ])
     
-    return pipeline
+    
+    parameters = {
+        'features__text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
+        'clf__estimator__n_estimators': [10, 100, 200],
+        'features__transformer_weights': (
+            {'text_pipeline': 1, 'sentlen': 0.5}, 
+            {'text_pipeline': 0.5, 'sentlen': 1})
+    }
+    
+    cv = GridSearchCV(pipeline, parameters, cv=3, n_jobs=1)
+    
+    return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
     """
@@ -136,9 +171,9 @@ def save_model(model, model_filepath):
     returns
     -------
     A pickle file containing the trained model
-    """
+    """    
     with open(model_filepath, 'wb') as handle:
-        pickle.dump(model, handle)
+        cloudpickle.dump(model, handle)
 
 def main():
     if len(sys.argv) == 3:
@@ -168,5 +203,5 @@ def main():
               'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     main()
