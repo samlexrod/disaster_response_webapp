@@ -71,6 +71,32 @@ def tokenize(text):
     
     return words
 
+def build_model():
+    """
+    The model creator that fits the data over a series of steps preprocessing 
+    before finally fitting into the classifier
+    returns
+    -------
+    A fitted model
+    """
+    forest = RandomForestClassifier()
+    clf_multi = MultiOutputClassifier(forest, n_jobs=-1)
+
+    pipeline = Pipeline(
+        steps=[
+            ('features', FeatureUnion(
+                transformer_list=[
+                    ('text_pipeline', Pipeline(
+                        steps=[
+                            ('vect', CountVectorizer(tokenizer=tokenize)),
+                            ('tfidf', TfidfTransformer())
+                        ]))
+                ])),
+            ('clf', clf_multi)
+        ])
+    
+    return pipeline
+
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
