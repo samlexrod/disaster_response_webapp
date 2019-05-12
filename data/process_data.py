@@ -48,6 +48,22 @@ def clean_data(df):
     return df
 
 
+def save_data(df, database_filename):
+    """
+    A procedure to save the data into sqlite3
+    parameter
+    ---------
+    database_filename : the name of the database to be created
+    """    
+    sqlite_db = 'sqlite:///%s' % database_filename
+    engine = create_engine(sqlite_db)
+
+    # Create table, insert messages or replace messages
+    df.to_sql('Messages', engine, index=False, if_exists='replace')  
+    
+    print(pd.read_sql("SELECT * FROM Messages LIMIT 5", engine))
+
+
 def main():
     if len(sys.argv) == 4:
 
