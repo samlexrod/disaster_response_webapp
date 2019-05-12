@@ -26,6 +26,10 @@ def extract_data(database_name):
     parameter
     ---------
     database_name : the name of the database to get the messages from
+    
+    returns
+    -------
+    Extracted features and label variables, and category names in a tuple
     """
     sqlite_db = 'sqlite:///{}'.format(database_name)
     engine = create_engine(sqlite_db)
@@ -49,9 +53,10 @@ def tokenize(text):
     parameter
     ---------
     text : the messages to tokenize, stem, and lemmatize
-    return
-    ------
-    cleaned words
+    
+    returns
+    -------
+    A list of cleaned words
     """
     # Clean the message
     text = re.sub("\W", " ", text)
@@ -78,6 +83,10 @@ def build_model():
     returns
     -------
     A fitted model
+    
+    returns
+    -------
+    A pipeline as the model
     """
     forest = RandomForestClassifier()
     clf_multi = MultiOutputClassifier(forest, n_jobs=-1)
@@ -115,6 +124,21 @@ def evaluate_model(model, X_test, Y_test, category_names):
     
         print(f"Score: {(true == pred).mean():2.2%}")
         print(col.upper(), '\n', classification_report(true, pred), '-- '*18, '\n')
+        
+def save_model(model, model_filepath):
+    """
+    To export the trained model into a pickle file that the app will use to predict
+    parameters
+    ----------
+    model : trained model
+    model_filepath : the name of the pickle file
+    
+    returns
+    -------
+    A pickle file containing the trained model
+    """
+    with open(model_filepath, 'wb') as handle:
+        pickle.dump(model, handle)
 
 def main():
     if len(sys.argv) == 3:
