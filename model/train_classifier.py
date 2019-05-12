@@ -97,6 +97,25 @@ def build_model():
     
     return pipeline
 
+def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    To evaluate the model that predicts the test set, prints the evaluation metrics
+    parameters
+    ----------
+    model : the pipeline to use
+    X_test : the test split of the messages
+    Y_test : the test split of the cleaned labels
+    category_names : a list of the label names
+    """
+    y_pred = model.predict(X_test)
+    
+    for i, col in enumerate(category_names):
+        true = Y_test[:, i]
+        pred = y_pred[:, i]
+    
+        print(f"Score: {(true == pred).mean():2.2%}")
+        print(col.upper(), '\n', classification_report(true, pred), '-- '*18, '\n')
+
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
