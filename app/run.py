@@ -1,6 +1,7 @@
 import json
 import plotly
 import pandas as pd
+import numpy as np
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -43,6 +44,12 @@ def index():
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
     
+    
+    df_labels = df.select_dtypes(include=np.int64).drop('id', axis=1)
+    
+    label_pcts = (df_labels.sum() / df_labels.count())
+    label_names = list(label_pcts.index)
+    
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -50,24 +57,33 @@ def index():
             'data': [
                 Bar(
                     x=genre_names,
-                    y=genre_counts
-                )
+                    y=genre_counts)
             ],
-
             'layout': {
                 'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
+                'yaxis': {'title': "Count"},
+                'xaxis': {'title': "Genre"}}
+        },
+        {
+            'data': [
+                Bar(
+                    x=label_pcts,
+                    y=label_names,
+                    orientation = 'h')
+            ],
+            'layout': {
+                'title': 'Distribution of Label Responses',
+                'yaxis': {'title': "Labels", 'tickformat': "%"},
+                'xaxis': {'title': "Percentage", 'tickformat': "%"},
+                'margin': {'l': 200, 'r': 20, 't': 140, 'b': 80},
+                'height': 1000,
+                'autosize': True}
         }
     ]
     
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
+    print(ids)
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
     
     # render web page with plotly graphs
@@ -93,7 +109,7 @@ def go():
 
 
 def main():
-    app.run(host='localhost', port=3001, debug=False)
+    app.run(host='localhost', port=3001, debug=True)
 
 
 if __name__ == '__main__':
