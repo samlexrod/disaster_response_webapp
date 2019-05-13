@@ -90,7 +90,7 @@ def build_model():
     A fitted model
     """
     forest = RandomForestClassifier()
-    clf_multi = MultiOutputClassifier(forest, n_jobs=-1)
+    clf_multi = MultiOutputClassifier(forest, n_jobs=1)
     
     class MessLen(BaseEstimator, TransformerMixin):
         """
@@ -126,8 +126,7 @@ def build_model():
                     ('sentlen', MessLen())
                 ])),
             ('clf', clf_multi)
-        ])
-    
+        ])    
     
     parameters = {
         'features__text_pipeline__vect__ngram_range': ((1, 1), (1, 2)),
