@@ -46,31 +46,3 @@ These are the instructions to run the scripts and web app:
 **README** : You are reading me!
 
 **airbnb_ml.yml** : This is the anaconda environment used for the analysis. The instructions on how to recreate this environment are going to be in the installation section below.
-
-
-## Registering the Environment to Use in Jupyter
-I created a specific environment for this project.
-```
-conda create -n disrep_ml
-```
-I exported the environment using (while activated):
-
-```
-conda env export > disrep_ml.yml
-```
-FYI: to remove an environment use (while deactivated):
-
-```
-conda remove --name disrep_ml --all
-```
-To recreate the environment type the following in anaconda prompt:
-
-```
-conda env create -f disrep_ml.yml
-
-conda install -n disrep_ml ipykernel
-
-ipython kernel install --user --name disrep_ml
-
-jupyter notebook
-```
