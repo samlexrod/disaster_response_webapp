@@ -9,6 +9,7 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
+from plotly.graph_objs import Histogram
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -50,6 +51,8 @@ def index():
     label_pcts = (df_labels.sum() / df_labels.count())
     label_names = list(label_pcts.index)
     
+    data_hist = df_labels.sum(axis=1)
+    
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
@@ -77,6 +80,19 @@ def index():
                 'xaxis': {'title': "Percentage", 'tickformat': "%"},
                 'margin': {'l': 200, 'r': 20, 't': 140, 'b': 80},
                 'height': 1000,
+                'autosize': True}
+        },
+        {
+            'data': [
+                Histogram(
+                    x=data_hist,
+                    histnorm = 'probability')
+            ],
+            'layout': {
+                'title': 'Histogram of Active Labels Per Message',
+                'yaxis': {'title': "Frequency", 'tickformat': "%"},
+                'xaxis': {'title': "Active Labels Per Message"},
+                'margin': {'l': 200, 'r': 20, 't': 140, 'b': 80},                
                 'autosize': True}
         }
     ]
